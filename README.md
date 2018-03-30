@@ -17,18 +17,6 @@ Command line tools for checking the availability and response time of any servic
 
 #### Basic usage:
 
-/etc/crontab
-``` sh
-# Fallback - provide start-up (and restart the script in case of death)
-*/10     *       *       *       *       root            cd /path/to && php fallback.php --host='www.example.com' --timeout=30 --sleep=10 --mail='user1@example.com user2@example.com userN@example.com' >> /var/log/fallback.log
-```
-/etc/newsyslog.conf
-``` sh
-# Fallback - rotation of the log file
-/var/log/fallback.log 		    root:wheel      644  10    1024  *     JC
-```
-
-#### Output:
 ````
 # php fallback.php --host=www.example.com
   Sat, 31 Mar 18 00:18:54 +0300 FALLBACK: Process has died! restarting...
@@ -43,3 +31,17 @@ Command line tools for checking the availability and response time of any servic
   Sat, 31 Mar 18 00:19:03 +0300 FALLBACK: www.example.com:80 - OK (time: 0.184117 sec.)
   ^CSat, 31 Mar 18 00:19:04 +0300 FALLBACK: got signal 2 and will exit.
 ````
+
+Or so...
+
+/etc/crontab
+``` sh
+# Fallback - provide start-up (and restart the script in case of death)
+*/10     *       *       *       *       root            cd /path/to && php fallback.php --host='www.example.com' --timeout=30 --sleep=10 --mail='user1@example.com user2@example.com userN@example.com' >> /var/log/fallback.log
+```
+/etc/newsyslog.conf
+``` sh
+# Fallback - rotation of the log file
+/var/log/fallback.log 		    root:wheel      644  10    1024  *     JC
+```
+
