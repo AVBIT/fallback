@@ -6,7 +6,7 @@
  * running on TCP, with sending a mail notification when changing status.
  * ----------------------------------------------------------------------------
  * Created by Viacheslav Avramenko aka Lordz (avbitinfo@gmail.com)
- * Created on 27.03.2018. Last modified on 29.03.2018
+ * Created on 27.03.2018. Last modified on 31.03.2018
  * ----------------------------------------------------------------------------
  * USAGE:
  * php fallback.php --help
@@ -38,7 +38,11 @@ if ($pid === false || posix_getsid($pid) === false) {
 register_shutdown_function('unlink', $lockfile);
 
 
-// Define the signal handling
+/**
+ * Define the signal handling
+ *
+ * @param $signo
+ */
 function sig_handler($signo){
     if ($signo == SIGTERM || $signo == SIGHUP || $signo == SIGINT){
         printf("%s FALLBACK: got signal %d and will exit.".PHP_EOL, date(DATE_RFC822), $signo);
@@ -161,11 +165,13 @@ while (true)
 exit(0); // Remove the lock!
 
 
-
-
-
 /**
  * Function to check response time
+ *
+ * @param $domain
+ * @param int $port
+ * @param int $timeout
+ * @return float|int
  */
 function pingSocket($domain, $port=80, $timeout = 20)
 {
