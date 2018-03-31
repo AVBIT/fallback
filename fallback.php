@@ -2,8 +2,9 @@
 <?php
 /**
  * FALLBACK
- * Command line tools for checking the availability and response time of any service
- * running on TCP, with sending a mail notification when changing status.
+ * Command line tools for checking the availability and response time
+ * of any service running on TCP, with sending a mail notification
+ * when changing status.
  * ----------------------------------------------------------------------------
  * Created by Viacheslav Avramenko aka Lordz (avbitinfo@gmail.com)
  * Created on 27.03.2018. Last modified on 31.03.2018
@@ -34,13 +35,12 @@ if ($pid === false || posix_getsid($pid) === false) {
 }
 
 
-// Remove the lock on exit (Control+C doesn't count as 'exit'?)
+// Remove the lock on exit (Control+C doesn't count as 'exit'!)
 register_shutdown_function('unlink', $lockfile);
 
 
 /**
  * Define the signal handling
- *
  * @param $signo
  */
 function sig_handler($signo){
@@ -60,6 +60,7 @@ $host = '';
 $port = 80;
 $timeout = 20;
 $sleep = 1;
+$count = 0;
 $recipients = [];
 $errors = [];
 
@@ -70,6 +71,7 @@ $params = array(
     'p::' => 'port::',
     't::' => 'timeout::',
     's::' => 'sleep::',
+    'c::' => 'count::',
     'm::' => 'mail::',
 );
 $options = getopt( implode('', array_keys($params)), $params );
@@ -96,6 +98,10 @@ if ( isset($options['sleep']) || isset($options['s']) ){
     $sleep = intval($sleep,10);
     $sleep = ($sleep == 0) ? 1 : $sleep;
 }
+if ( isset($options['count']) || isset($options['c']) ){
+    $count = isset( $options['count'] ) ? $options['count'] : $options['c'];
+    $count = intval($count,10);
+}
 if ( isset($options['mail']) || isset($options['m']) ){
     $mail = isset( $options['mail'] ) ? $options['mail'] : $options['m'];
     $recipients = preg_split("/[\s,;|]+/", $mail);
@@ -114,6 +120,7 @@ Options:
         -p   --port         Port number (optional, default: 80)
         -t   --timeout      Maximum response time (optional, default: 20, seconds)
         -s   --sleep        Sleep time after a successful check (optional, default: 1, seconds)
+        -c   --count        Stop after count of connection attempts (optional, default: 0, operate until interrupted). 
         -m   --mail         Notification email or emails separated pattern /[\s,;|]+/ (optional)
 Example:
         php fallback.php --host='www.example.com' 
@@ -129,9 +136,12 @@ Example:
 
 $status_curr = true;
 $status_prev = true;
+
 $service_name = "$host:$port";
 
-while (true)
+$done = ($count<=0) ? 1:$count;
+
+while ($done)
 {
     if (pingSocket($host,$port,$timeout)>=0)
     {
@@ -159,15 +169,17 @@ while (true)
         }
     }
     pcntl_signal_dispatch();
+    if ($count>0) $done--;
 }
 
 
 exit(0); // Remove the lock!
 
 
+
+
 /**
- * Function to check response time
- *
+ * Check response time
  * @param $domain
  * @param int $port
  * @param int $timeout
