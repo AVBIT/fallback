@@ -8,12 +8,13 @@ Command line tools for checking the availability and response time of any servic
 
 
 #### Command line options:
-               --help         Show this message
-          -h   --host         Ip-address or domain name (required)
-          -p   --port         Port number (optional, default: 80)
-          -t   --timeout      Maximum response time (optional, default: 20, seconds)
-          -s   --sleep        Sleep time after a successful check (optional, default: 1, seconds)
-          -m   --mail         Notification email or emails separated pattern /[\s,;|]+/ (optional)
+          --help         Show this message
+     -h   --host         Ip-address or domain name (required)
+     -p   --port         Port number (optional, default: 80)
+     -t   --timeout      Maximum response time (optional, default: 20, seconds)
+     -s   --sleep        Sleep time after a successful check (optional, default: 1, seconds)
+     -c   --count        Stop after count of connection attempts (optional, default: 0, operate until interrupted). 
+     -m   --mail         Notification email or emails separated pattern /[\s,;|]+/ (optional)
 
 #### Basic usage:
 
