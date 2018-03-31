@@ -35,8 +35,33 @@ if ($pid === false || posix_getsid($pid) === false) {
 }
 
 
+
 // Remove the lock on exit (Control+C doesn't count as 'exit'!)
-register_shutdown_function('unlink', $lockfile);
+//register_shutdown_function('unlink', $lockfile);
+function shutdown($lockfile)
+{
+    global $stat;
+    global $service_name;
+    @unlink($lockfile);
+
+    printf("%s FALLBACK: %s STATISTICS: %d total, %d responses, %d (%d%%) timeouts",
+        date(DATE_RFC822),
+        $service_name,
+        $stat['responses']['count']+$stat['timeouts'],
+        $stat['responses']['count'],
+        $stat['timeouts'],
+        ($stat['timeouts'] > 0) ? (($stat['responses']['count']+$stat['timeouts']) / $stat['timeouts'] *100) : 0);
+
+    if ($stat['responses']['vf_avg'] > 0){
+        printf(", response time min/avg/max %.6f/%.6f/%.6f sec.",
+            $stat['responses']['min'],
+            ($stat['responses']['vf_avg']/$stat['responses']['count']),
+            $stat['responses']['max']);
+    }
+    echo PHP_EOL;
+    exit;
+}
+register_shutdown_function('shutdown', $lockfile);
 
 
 /**
@@ -54,15 +79,16 @@ pcntl_signal(SIGHUP,"sig_handler");
 pcntl_signal(SIGINT,"sig_handler");
 
 
+$stat = array(
+    'responses' => array(
+        'count' => 0,
+        'min' => -1.0,
+        'max' => 0.0,
+        'vf_avg' => 0.0,
+    ),
+    'timeouts' => 0,
+);
 
-// Default command line options value
-$host = '';
-$port = 80;
-$timeout = 20;
-$sleep = 1;
-$count = 0;
-$recipients = [];
-$errors = [];
 
 // Command line options
 $params = array(
@@ -75,6 +101,17 @@ $params = array(
     'm::' => 'mail::',
 );
 $options = getopt( implode('', array_keys($params)), $params );
+
+
+// Default command line options value
+$host = '';
+$port = 80;
+$timeout = 20;
+$sleep = 1;
+$count = 0;
+$recipients = [];
+
+$errors = [];
 
 
 if ( isset($options['host']) || isset($options['h']) ){
@@ -143,9 +180,13 @@ $done = ($count<=0) ? 1:$count;
 
 while ($done)
 {
-    if (pingSocket($host,$port,$timeout)>=0)
+    if (($time=pingSocket($host,$port,$timeout)) >= 0 )
     {
         $status_curr = true;
+        $stat['responses']['count'] ++;
+        $stat['responses']['vf_avg'] += $time;  // overflow...
+        if ($time < $stat['responses']['min'] || $stat['responses']['min'] == -1) $stat['responses']['min'] = $time;
+        if ($time > $stat['responses']['max']) $stat['responses']['max'] = $time;
         if (count($recipients) && $status_curr !== $status_prev){
             $status_prev = $status_curr;
             $mail_subject = "Fallback $service_name UP";
@@ -158,6 +199,7 @@ while ($done)
         sleep($sleep);
     } else {
         $status_curr = false;
+        $stat['timeouts'] ++;
         if (count($recipients) && $status_curr !== $status_prev){
             $status_prev = $status_curr;
             $mail_subject = "Fallback $service_name DOWN";

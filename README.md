@@ -19,18 +19,18 @@ Command line tools for checking the availability and response time of any servic
 #### Basic usage:
 
 ````
-# php fallback.php --host=www.example.com
-  Sat, 31 Mar 18 00:18:54 +0300 FALLBACK: Process has died! restarting...
-  Sat, 31 Mar 18 00:18:54 +0300 FALLBACK: www.example.com:80 - OK (time: 0.183406 sec.)
-  Sat, 31 Mar 18 00:18:55 +0300 FALLBACK: www.example.com:80 - OK (time: 0.185397 sec.)
-  Sat, 31 Mar 18 00:18:56 +0300 FALLBACK: www.example.com:80 - OK (time: 0.185805 sec.)
-  Sat, 31 Mar 18 00:18:57 +0300 FALLBACK: www.example.com:80 - OK (time: 0.185418 sec.)
-  Sat, 31 Mar 18 00:18:59 +0300 FALLBACK: www.example.com:80 - OK (time: 0.185886 sec.)
-  Sat, 31 Mar 18 00:19:00 +0300 FALLBACK: www.example.com:80 - OK (time: 0.183130 sec.)
-  Sat, 31 Mar 18 00:19:01 +0300 FALLBACK: www.example.com:80 - OK (time: 0.184344 sec.)
-  Sat, 31 Mar 18 00:19:02 +0300 FALLBACK: www.example.com:80 - OK (time: 0.183470 sec.)
-  Sat, 31 Mar 18 00:19:03 +0300 FALLBACK: www.example.com:80 - OK (time: 0.184117 sec.)
-  ^CSat, 31 Mar 18 00:19:04 +0300 FALLBACK: got signal 2 and will exit.
+# php fallback.php --host=example.com -c=100
+  Sat, 31 Mar 18 11:19:27 +0000 FALLBACK: Process has died! restarting...
+  Sat, 31 Mar 18 11:19:27 +0000 FALLBACK: example.com:80 - OK (time: 0.192442 sec.)
+  Sat, 31 Mar 18 11:19:29 +0000 FALLBACK: example.com:80 - OK (time: 0.186559 sec.)
+  Sat, 31 Mar 18 11:19:30 +0000 FALLBACK: example.com:80 - OK (time: 0.220498 sec.)
+  Sat, 31 Mar 18 11:19:32 +0000 FALLBACK: example.com:80 - OK (time: 1.321489 sec.)
+  Sat, 31 Mar 18 11:19:33 +0000 FALLBACK: example.com:80 - OK (time: 0.194539 sec.)
+  Sat, 31 Mar 18 11:19:35 +0000 FALLBACK: example.com:80 - OK (time: 0.183689 sec.)
+  Sat, 31 Mar 18 11:19:36 +0000 FALLBACK: example.com:80 - OK (time: 0.186502 sec.)
+  ^CSat, 31 Mar 18 11:19:36 +0000 FALLBACK: got signal 2 and will exit.
+  Sat, 31 Mar 18 11:19:36 +0000 FALLBACK: example.com:80 STATISTICS: 7 total, 7 responses, 0 (0%) timeouts, response time min/avg/max 0.183689/0.355103/1.321489 sec.
+
 ````
 
 Or so...
@@ -38,7 +38,7 @@ Or so...
 /etc/crontab
 ``` sh
 # Fallback - provide start-up (and restart the script in case of death)
-*/10     *       *       *       *       root            cd /path/to && php fallback.php --host='www.example.com' --timeout=30 --sleep=10 --mail='user1@example.com user2@example.com userN@example.com' >> /var/log/fallback.log
+*/2     *       *       *       *       root            cd /path/to && php fallback.php --host='www.example.com' --timeout=30 --sleep=5 --count=3600 --mail='user1@example.com user2@example.com userN@example.com' >> /var/log/fallback.log
 ```
 /etc/newsyslog.conf
 ``` sh
