@@ -247,9 +247,10 @@ function pingSocket($domain, $port=80, $timeout = 20)
         }
         printf("%s FALLBACK: %s:%d - DOWN (timeout:%d sec.; errno:%d; errstr: %s)".PHP_EOL, date(DATE_RFC822), $domain, $port, $timeout, $errno, $errstr);
     } else {
-        fclose($fd);
+        if (is_resource($fd)) fclose($fd);
         $result = round ( ($endtime - $starttime), 6, PHP_ROUND_HALF_UP);
         printf("%s FALLBACK: %s:%d - OK (time: %.6f sec.)".PHP_EOL, date(DATE_RFC822), $domain, $port, $result);
     }
     return $result;
 }
+
